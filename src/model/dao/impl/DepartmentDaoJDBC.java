@@ -10,59 +10,64 @@ import java.util.List;
 
 import db.DB;
 import db.DbException;
-import db.DbIntegrityException;
 import model.dao.DepartmentDao;
 import model.entities.Department;
 
 public class DepartmentDaoJDBC implements DepartmentDao {
-
+	
 	private Connection conn;
 	
 	public DepartmentDaoJDBC(Connection conn) {
 		this.conn = conn;
 	}
-	
+
 	@Override
 	public void insert(Department obj) {
+		
 		PreparedStatement st = null;
+		
 		try {
+			
 			st = conn.prepareStatement(
 					"INSERT INTO department "
-					+ "(Id, Name) "
-					+ "VALUES "
-					+ "(?, ?) ",
+					+"(Name) "
+					+"VALUES "
+					+ "(?) ",
 					Statement.RETURN_GENERATED_KEYS);
 			
-			st.setInt(1, obj.getId());
-			st.setString(2, obj.getName());
-			
-			int rowsAffected = st.executeUpdate();
-			
-			if(rowsAffected > 0) {
+			st.setString(1, obj.getName());
+			int rows = st.executeUpdate();
+			if(rows > 0 ) {
 				ResultSet rs = st.getGeneratedKeys();
-				if(rs.next()) {
+				while(rs.next()) {
 					int id = rs.getInt(1);
 					obj.setId(id);
 				}
 				DB.closeResultSet(rs);
 			}
 			else {
-				throw new DbException("Unexpected erroor! No rowws affected!");
-			}
+					throw new DbException("Not rows Affected!");
+				}
+			
 		}
 		catch(SQLException e) {
 			throw new DbException(e.getMessage());
 		}
 		finally {
 			DB.closeStatement(st);
+			
 		}
+		
 		
 	}
 
 	@Override
 	public void update(Department obj) {
+		
 		PreparedStatement st = null;
+		
 		try {
+			
 			st = conn.prepareStatement(
 					"UPDATE department "
 					+ "SET Name = ? "
@@ -71,7 +76,7 @@ public class DepartmentDaoJDBC implements DepartmentDao {
 			st.setString(1, obj.getName());
 			st.setInt(2, obj.getId());
 			
-			st.executeUpdate();
+			st.executeUpdate();	
 		}
 		catch(SQLException e) {
 			throw new DbException(e.getMessage());
@@ -84,20 +89,23 @@ public class DepartmentDaoJDBC implements DepartmentDao {
 
 	@Override
 	public void deleteById(Integer id) {
+		
 		PreparedStatement st = null;
+		
 		try {
-			st = conn.prepareStatement("DELETE FROM department WHERE Id = ?");
-
+			
+			st = conn.prepareStatement(
+					"DELETE FROM department WHERE Id = ?");
+			
 			st.setInt(1, id);
 			
 			int rows = st.executeUpdate();
-			
 			if(rows == 0) {
-				throw new DbException("Id does not exist");
+				throw new DbException("Id not exist!");
 			}
 		}
 		catch(SQLException e) {
-			throw new DbIntegrityException(e.getMessage());
+			throw new DbException(e.getMessage());
 		}
 		finally {
 			DB.closeStatement(st);
@@ -106,19 +114,23 @@ public class DepartmentDaoJDBC implements DepartmentDao {
 	}
 
 	@Override
-	public Department findById(Integer id) {	
-		PreparedStatement st = null;
-		ResultSet  rs = null;
+	public Department findById(Integer id) {
 		
-		try{
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {
+			
 			st = conn.prepareStatement(
 					"SELECT * FROM department "
-					+ "WHERE Id = ?");
-			
+					+"WHERE "
+					+ "Id = ?");
+
 			st.setInt(1, id);
+			
 			rs = st.executeQuery();
 			if(rs.next()) {
-				Department dep = instantiateDepartment(rs); 
+				Department dep = instantiateDepartment(rs);
 				return dep;
 			}
 			return null;
@@ -130,6 +142,8 @@ public class DepartmentDaoJDBC implements DepartmentDao {
 			DB.closeStatement(st);
 			DB.closeResultSet(rs);
 		}
+		
+		
 	}
 
 	private Department instantiateDepartment(ResultSet rs) throws SQLException {
@@ -141,22 +155,23 @@ public class DepartmentDaoJDBC implements DepartmentDao {
 
 	@Override
 	public List<Department> findAll() {
+		
 		PreparedStatement st = null;
 		ResultSet rs = null;
+		
 		try {
 			st = conn.prepareStatement(
-					" SELECT * FROM department " 
-					+ "ORDER BY Name ");
+					"SELECT * FROM department ");
 			
 			rs = st.executeQuery();
 			
 			List<Department> list = new ArrayList<>();
 			
 			while(rs.next()) {
-				Department dep = instantiateDepartment(rs); 
+				Department dep = instantiateDepartment(rs);
 				list.add(dep);
 			}
-			return list;	
+			return list;
 		}
 		catch(SQLException e) {
 			throw new DbException(e.getMessage());
@@ -165,6 +180,8 @@ public class DepartmentDaoJDBC implements DepartmentDao {
 			DB.closeStatement(st);
 			DB.closeResultSet(rs);
 		}
+		
+		
 	}
 
 	

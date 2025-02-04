@@ -10,43 +10,46 @@ import model.entities.Department;
 public class Program2 {
 
 	public static void main(String[] args) {
-		
-		DepartmentDao departmentDao = DaoFactory.createDepartmentDao();
-		
-		Scanner sc = new Scanner(System.in);
 
+		
+		DepartmentDao depDao = DaoFactory.createDepartmentDao();
+
+		Scanner sc = new Scanner(System.in);
+		
 		System.out.println("=== TEST 1: department findyById ====");
 		
-		Department department = departmentDao.findById(3);
-		System.out.println(department);
+		Department dep = depDao.findById(2);
+
+		System.out.println(dep);
 		
-		System.out.println("\n ===== TEST 2: department findyByAll =====");
+		System.out.println("\n === TEST 2: department findByAll ===");
 		
-		List<Department> list = departmentDao.findAll();
-		for(Department obj : list) {
-			System.out.println(obj);
+		List<Department> list = depDao.findAll();
+		
+		for(Department depa : list) {
+			System.out.println(depa);
 		}
-	
-		System.out.println("\n ===== TEST 3: department insert =====");
 		
-		Department newDepartment = new Department(8, "Musica");
-	    departmentDao.insert(newDepartment);
-		System.out.println("Inserted! New id = " + newDepartment.getId());
+		System.out.println("\n === TEST 3: department insert =====");
 		
-		System.out.println("\n ===== TEST 4: department update =====");
+		Department depa = new Department(null, "Artes");
+		depDao.insert(depa);
+		System.out.println("Inser! New id:  " +depa.getId());
 		
-		department = departmentDao.findById(8);
-		department.setName("Music");
-		departmentDao.update(department);
-		System.out.println("Update completed");
-	
-		System.out.println("\n ===== TEST 5: department delete =====");
+		System.out.println("\n === TEST 4: department update =====");
 		
-		System.out.print("Enter id for delete test: ");
+		depa.setId(9);
+		depa.setName("Licitação");
+		depDao.update(depa);
+		
+		System.out.println("Update complet ");
+		
+		System.out.println("\n === TEST 5: department delete =====");
+		
+		System.out.println("Enter id for delete test: ");
 		int id = sc.nextInt();
-		departmentDao.deleteById(id);
+		depDao.deleteById(id);
 		System.out.println("Delete completed");
-		
 		
 		sc.close();
 	}
